@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<script type="text/javascript" src="jquery.min.js"></script>
+	<link href="http://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.8/summernote.css" rel="stylesheet">
+        <script src="http://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.8/summernote.js"></script>
+         <link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+      <!--   <link rel="stylesheet" href="css.css" /> -->
+        <!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+        <script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+</head>
+<body>
+	 <div class="info col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+                <button type="button" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#myModal4">
+                  文图
+                </button>
+                <!-- Modal -->
+                <div class="modal fade" id="myModal4" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                  <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="myModalLabel">
+                      </div>
+                      <div class="modal-body">
+                        <input type="file" onchange="getFiles4(this)" class="img4" /><button class="btn_flie4">提交</button><br>                       
+                            <div id="summernote4">Hello Summernote</div>
+                            <div class="box"></div>
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        <button type="button" class="qpr4 btn btn-primary" data-dismiss="modal">确认修改</button>
+                        <button type="button" class="btn4 btn btn-primary" data-dismiss="modal">GO!</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="table-responsive">
+                  <table class="table table-striped">
+                    <thead>
+                      <tr>
+                        <th>id</th>
+                        <th>img</th>   
+                      </tr>
+                    </thead>
+                    <tbody class="new"></tbody>
+                  </table>  
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+</body>
+</html>
+<script type="text/javascript">
+ ajax4();
+              
+          var file;
+             function getFiles4 (el) {
+               file=el.files;
+               console.log(file)
+            }
+            $(".btn_flie4").click(function(){
+                    var fd = new FormData();
+                    for(var i = 0;i<file.length;i++){
+                        fd.append('files',file[i])
+                    }
+                     //console.log(fd)
+                    $.ajax({
+                        url:"http://localhost:8002/index/img",
+                        type:'POST',
+                        data:fd,
+                        contentType:false,
+                        processData:false,
+                        success:function(e){
+                            console.log(e)
+                        }
+                    }) 
+            })
+        $(".btn4").click(function() {
+            $.ajax({
+              url:"http://localhost:8002/index/insert",
+              type:'POST',
+              data:{sel:$("#summernote4").summernote('code')},
+              success:function(e){
+                ajax4()
+              }
+            }) 
+        });
+        //修改
+            function gai4(){
+              $(".pr4").click(function(){
+                var id=$(this).attr("data-id");
+                $(".qpr4").attr("data-cc",id)
+                console.log(id)
+                $.ajax({
+                  url:"http://localhost:8002/index/gai",
+                  type:"POST",
+                  data:{gai:id},
+                  success:function(d){
+                    $("#summernote4").summernote('code',d[0].con)
+                  }
+                })
+              })
+            }
+            // //确认修改
+              $(".qpr4").click(function(){
+                var id=$(this).attr("data-cc");
+                console.log(id)
+                $.ajax({
+                  url:"http://localhost:8002/index/qrgai",
+                  type:"POST",
+                  data:{
+                        id:id,
+                        sel:$("#summernote4").summernote('code')
+                      },
+                  success:function(d){
+                    // console.log(d)
+                    ajax4();
+                  }
+
+                })
+              })
+            //删除
+            function clk4(){
+              $(".delete4").click(function(){
+                  var dataid=$(this).attr("data-id")
+                  var _this=$(this)
+                  $.ajax({
+                    url:"http://localhost:8002/index/delete",
+                    type:"POST",
+                    data:{id:dataid},
+                    success:function(d){
+                      _this.parent().parent().remove();
+                    }
+                  })
+              })
+            }
+      function ajax4(){
+        $.ajax({
+          url:"http://localhost:8002/index/tr",
+          type:"POST",
+          success:function(d){ 
+            var str="";
+            for(i in d){
+              str+=`<tr><td>${d[i].id}</td><td><img class="img4" src="images/${d[i].img}" alt=""></td><td><button type='' data-id=${d[i].id}  data-toggle="modal" data-target="#myModal4" class="pr4">修改</button><button type='' data-id=${d[i].id} class="delete4">删除</button></td></tr>`;
+            };
+
+            $(".new").html(str)
+            clk4()
+            gai4()
+          },
+          error:function(){
+            console.log("服务器错误")
+          }
+        })
+      }       
+</script>
